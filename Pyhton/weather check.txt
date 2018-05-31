@@ -1,0 +1,38 @@
+#coding=utf-8
+import urllib2
+import gzip
+from StringIO import StringIO
+import urllib
+import json
+def weather():
+    cus = raw_input('请输入您要查询的城市:')
+    you = urllib.quote(cus)
+    request = urllib2.Request('http://wthrcdn.etouch.cn/weather_mini?city=%s'%you)
+    request.add_header('Accepting-encoding','gzip')
+    response = urllib2.urlopen(request)
+    if response.info().get('Content-Encoding'):
+        buf = StringIO(response.read())
+        f = gzip.GzipFile(fileobj=buf)
+        data = f.read()
+        final_data = json.loads(data)
+        get_city = final_data.get('data')
+        if get_city:
+            print '当前空气质量：%s'%get_city.get('aqi').decode('utf-8').encode('gbk')
+            forecast = get_city.get('forecast')
+            for a in forecast:
+                print u'最高温度：%s'%a.get('high')
+                print u'最低温度：%s'%a.get('low')
+                print u'风向：%s'%a.get('fengxiang')
+                print u'天气状况：%s'%a.get('type')
+                print u'日期：%s'%a.get('date')
+                print '--------------------'
+        else:
+            print '无法查询您输入的城市，抱歉'
+
+if __name__=='__main__':
+    weather()
+    x = raw_input('继续查询请按:1 否则请直接退出\n')
+    while x.endswith('1'):
+        weather()
+    else:
+        exit()
